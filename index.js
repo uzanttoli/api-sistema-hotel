@@ -3,8 +3,6 @@ const express = require('express');
 const app = express();
 const router = require('./router/router.js');
 
-
-
 app.use(bodyParser.urlencoded({extended: false}));
 
 app.use(bodyParser.json());
