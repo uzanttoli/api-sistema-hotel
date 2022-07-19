@@ -15,4 +15,6 @@ router.delete("/hotels", HotelsController.remove);
 router.get("/users", UsersController.index);
 router.post("/users", UsersController.new);
 router.get("/user/:id", UsersController.userId);
+router.delete("/user/:id", UsersController.remove);
+router.post("/login", UsersController.login);
 module.exports = router;

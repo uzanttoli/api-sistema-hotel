@@ -4,7 +4,9 @@ const bcrypt = require("bcrypt");
 class Users {
   async findAll() {
     try {
-      var result = await db.select(["id", "name", "email"]).table("users");
+      var result = await db
+        .select(["id", "name", "email", "role"])
+        .table("users");
       return result;
     } catch (error) {
       return [];
@@ -16,12 +18,12 @@ class Users {
       var result = await db.select().where({ email: email }).table("users");
 
       if (result.length > 0) {
-        return true;
+        return result[0];
       } else {
-        return false;
+        return undefined;
       }
     } catch (error) {
-      return { status: false, err: error };
+      return undefined;
     }
   }
 
@@ -33,6 +35,15 @@ class Users {
       } else {
         return undefined;
       }
+    } catch (error) {
+      return { status: false, err: error };
+    }
+  }
+
+  async delete(id) {
+    try {
+      await db.delete().where({ id: id }).table("users");
+      return true;
     } catch (error) {
       return { status: false, err: error };
     }
