@@ -24,11 +24,11 @@ class UsersController {
   }
 
   async new(req, res) {
-    var { name, email, password, role } = req.body;
+    var { name, email, password } = req.body;
 
     var emailExists = await Users.findByEmail(email);
 
-    if (emailExists == undefined) {
+    if (emailExists != undefined) {
       res.status(406);
       res.json({ err: "Este nome ja está cadastrado!" });
     } else {
@@ -72,6 +72,25 @@ class UsersController {
       }
     } else {
       res.json("Usuario não encontrado!");
+    }
+  }
+
+  async validateToken(req, res) {
+    var token = req.body.token;
+    try {
+      var result = jwt.verify(token, secret);
+
+      // var emailExists = await UsersController.findByEmail(result.email);
+      var emailDecoded = result.email;
+      var emailExists = await Users.findByEmail(emailDecoded);
+
+      if (emailExists != undefined) {
+        res.json({ status: true });
+      } else {
+        res.json("Token invalido!");
+      }
+    } catch (error) {
+      res.json(error);
     }
   }
 }

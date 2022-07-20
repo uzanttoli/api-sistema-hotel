@@ -1,14 +1,17 @@
 const bodyParser = require("body-parser");
-const express = require('express');
+const express = require("express");
 const app = express();
-const router = require('./router/router.js');
+const router = require("./router/router.js");
+var cors = require("cors");
 
-app.use(bodyParser.urlencoded({extended: false}));
+app.use(bodyParser.urlencoded({ extended: false }));
 
 app.use(bodyParser.json());
 
-app.use("/", router);
+app.use("/", cors(), router);
 
-app.listen(3000,()=>{
-    console.log("Servidor rodando...")
-})
+app.use(cors());
+
+app.listen(3000, () => {
+  console.log("Servidor rodando...");
+});
