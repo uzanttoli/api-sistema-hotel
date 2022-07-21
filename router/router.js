@@ -17,11 +17,13 @@ router.post("/hotels", VerifyToken, HotelsController.new);
 router.delete("/hotels", VerifyToken, HotelsController.remove);
 
 router.get("/users", VerifyToken, UsersController.index);
-router.post("/users", VerifyToken, UsersController.new);
+router.post("/users", UsersController.new);
 router.get("/user/:id", VerifyToken, UsersController.userId);
 router.delete("/user/:id", VerifyToken, UsersController.remove);
 router.post("/login", UsersController.login);
 router.post("/validate", UsersController.validateToken);
+router.post("/recoverypassword", UsersController.recoveryPassword);
+router.post("/changepassword", UsersController.changepassword);
 
 router.post("/register", VerifyToken, MarkingController.register);
 router.get("/records", VerifyToken, MarkingController.records);

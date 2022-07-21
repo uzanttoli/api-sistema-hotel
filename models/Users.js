@@ -1,6 +1,6 @@
 const db = require("../database/connection.js");
 const bcrypt = require("bcrypt");
-
+var PasswordToken = require("../models/PasswordToken.js");
 class Users {
   async findAll() {
     try {
@@ -57,6 +57,12 @@ class Users {
     } catch (error) {
       return { status: false, err: error };
     }
+  }
+
+  async changePassword(newPassword, id, token) {
+    var hash = await bcrypt.hash(newPassword, 15);
+    await db.update({ password: hash }).where({ id: id }).table("users");
+    await PasswordToken.setUsed(token);
   }
 }
 

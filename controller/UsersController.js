@@ -1,6 +1,7 @@
 var Users = require("../models/Users.js");
 var jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
+var PasswordToken = require("../models/PasswordToken.js");
 
 var secret = "73aq+*c*vtzr)shx-s-ykb=%@p!&=57qs9-amuk0pivnito-8$";
 
@@ -28,16 +29,21 @@ class UsersController {
 
     var emailExists = await Users.findByEmail(email);
 
-    if (emailExists != undefined) {
-      res.status(406);
-      res.json({ err: "Este nome ja está cadastrado!" });
+    if (name == "" || email == "" || password == "") {
+      res.status(400);
+      res.json({ err: "Necessario preencher todos os campos!" });
     } else {
-      var result = await Users.create(name, email, password, { role: 0 });
-      if (result) {
-        res.json(result.msg);
-      } else {
+      if (emailExists != undefined) {
         res.status(406);
-        res.json(result.msg);
+        res.json({ err: "Este email ja está cadastrado!" });
+      } else {
+        var result = await Users.create(name, email, password, { role: 0 });
+        if (result) {
+          res.json(result.msg);
+        } else {
+          res.status(406);
+          res.json(result.msg);
+        }
       }
     }
   }
@@ -59,19 +65,25 @@ class UsersController {
   async login(req, res) {
     var { email, password } = req.body;
 
-    var user = await Users.findByEmail(email);
-    if (user != undefined) {
-      var result = await bcrypt.compare(password, user.password);
-
-      if (result) {
-        var token = jwt.sign({ email: user.email, role: user.role }, secret);
-        res.json({ token: token });
-      } else {
-        res.status(404);
-        res.json({ err: "Usuario ou senha invalida!" });
-      }
+    if (email == "" || password == "") {
+      res.status(400);
+      res.json({ err: "Necessario preencher todos os campos!" });
     } else {
-      res.json("Usuario não encontrado!");
+      var user = await Users.findByEmail(email);
+      if (user != undefined) {
+        var result = await bcrypt.compare(password, user.password);
+
+        if (result) {
+          var token = jwt.sign({ email: user.email, role: user.role }, secret);
+          res.json({ token: token });
+        } else {
+          res.status(404);
+          res.json({ err: "Usuario ou senha invalida!" });
+        }
+      } else {
+        res.status(406);
+        res.json({ status: false, err: "Usuario nao encontrado!" });
+      }
     }
   }
 
@@ -91,6 +103,38 @@ class UsersController {
       }
     } catch (error) {
       res.json(error);
+    }
+  }
+
+  async recoveryPassword(req, res) {
+    var email = req.body.email;
+
+    var result = await PasswordToken.create(email);
+
+    if (result.status) {
+      res.json({ token: result.token });
+    } else {
+      res.status(406);
+      res.json({ err: result.err });
+    }
+  }
+
+  async changepassword(req, res) {
+    var token = req.body.token;
+    var password = req.body.password;
+
+    var isTokenValid = await PasswordToken.validate(token);
+
+    if (isTokenValid.status) {
+      await Users.changePassword(
+        password,
+        isTokenValid.token.user_id,
+        isTokenValid.token.token
+      );
+      res.json({ msg: "Senha alterada com sucesso!" });
+    } else {
+      res.status(406);
+      res.json({ err: "Token é invalido!" });
     }
   }
 }
